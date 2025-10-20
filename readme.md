@@ -42,36 +42,6 @@ This proof can later be verified by anyone via the provided REST API.
 ```bash
 git clone https://github.com/yourusername/proof-of-prompt.git
 cd proof-of-prompt
-
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-### 2️⃣ Create and Activate a Virtual Environment
-Create a .env file in the root folder and add:
-
-```bash
-PRIVATE_KEY=your_wallet_private_key
-WALLET_ADDRESS=your_public_wallet_address
-INFURA_URL=https://sepolia.infura.io/v3/your_project_id
-CONTRACT_ADDRESS=your_deployed_contract_address
-
-### 4️⃣ Run the API Server
-```bash
-uvicorn main:app --reload
-
-
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|--------|-------------|
-| Smart Contract | Solidity (Ethereum / Sepolia) |
-| Backend API | FastAPI (Python) |
-| Blockchain Interaction | Web3.py |
-| Hashing | SHA-256 |
-| Frontend (Planned) | React + Tailwind CSS |
-
 ---
 
 ## ⚙️ Setup Instructions
@@ -201,7 +171,3 @@ Open an issue or fork the project to get started.
 This project is licensed under the **MIT License** — feel free to use and build upon it.
 
 ---
-
-```
-```
-

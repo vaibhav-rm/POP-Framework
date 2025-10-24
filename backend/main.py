@@ -1,33 +1,52 @@
 import os
 import json
 import hashlib
-from fastapi import FastAPI, HTTPException
+import requests
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from web3 import Web3, exceptions
+from fastapi.middleware.cors import CORSMiddleware
+from google import genai
 
+# Load environment variables
 load_dotenv()
 
 INFURA_URL = os.getenv("INFURA_URL")
-PRIVATE_KEY = os.getenv("PRIVATE_KEY")  # MetaMask account private key (use a test wallet!)
+PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS")
-GEMINI_KEY = os.getenv("GEMINI_API_KEY")  # optional: for generating content with Gemini
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
 if not INFURA_URL or not PRIVATE_KEY or not CONTRACT_ADDRESS:
-    raise RuntimeError("Set INFURA_URL, PRIVATE_KEY, CONTRACT_ADDRESS in env")
+    raise RuntimeError("Missing required environment variables")
 
+# Web3 setup
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 acct = w3.eth.account.from_key(PRIVATE_KEY)
 contract_address = Web3.to_checksum_address(CONTRACT_ADDRESS)
 
-# load ABI
+# Load contract ABI
 with open("proof_contract_abi.json", "r") as f:
     contract_abi = json.load(f)
 
 contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 
-app = FastAPI(title="Proof-of-Prompt API", version="1.0.0")
+# FastAPI app
+app = FastAPI(
+    title="Proof-of-Prompt API",
+    description="A blockchain-based service that registers and verifies immutable AI prompt-output proofs.",
+    version="2.0.0"
+)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Models
 class RegisterRequest(BaseModel):
     prompt: str
     output: str
@@ -35,24 +54,45 @@ class RegisterRequest(BaseModel):
 class VerifyRequest(BaseModel):
     prompt: str
     output: str
-    creator: str  # hex address of creator
+    creator: str
 
+class VerifyTxRequest(BaseModel):
+    tx_hash: str
+
+# Utility: hash function
 def sha256_hex(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
+
+# Helper: convert Proof tuple to dict
+def proof_tuple_to_dict(t):
+    # t = (creator_address, promptHash, outputHash, timestamp, verified)
+    return {
+        "creator": t[0],
+        "prompt_hash": t[1].decode("utf-8") if isinstance(t[1], bytes) else t[1],
+        "output_hash": t[2].decode("utf-8") if isinstance(t[2], bytes) else t[2],
+        "timestamp": int(t[3]),
+        "verified": t[4],
+    }
+
+
+# --------------------------- ROUTES --------------------------- #
 
 @app.post("/register")
 def register(req: RegisterRequest):
     prompt_hash = sha256_hex(req.prompt)
     output_hash = sha256_hex(req.output)
 
-    # build tx
     try:
+        estimated_gas = contract.functions.registerProof(prompt_hash, output_hash).estimate_gas({
+            "from": acct.address
+        })
         tx = contract.functions.registerProof(prompt_hash, output_hash).build_transaction({
             "from": acct.address,
             "nonce": w3.eth.get_transaction_count(acct.address),
-            "gas": 220000,
+            "gas": int(estimated_gas * 1.2),
             "gasPrice": w3.eth.gas_price,
         })
+
         signed = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
         tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -62,11 +102,11 @@ def register(req: RegisterRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {
-        "message": "Proof registered",
+        "message": "Proof registered successfully",
         "prompt_hash": prompt_hash,
         "output_hash": output_hash,
         "tx_hash": receipt.transactionHash.hex(),
-        "blockNumber": receipt.blockNumber
+        "block_number": receipt.blockNumber,
     }
 
 @app.post("/verify")
@@ -74,28 +114,97 @@ def verify(req: VerifyRequest):
     prompt_hash = sha256_hex(req.prompt)
     output_hash = sha256_hex(req.output)
     try:
-        valid = contract.functions.verifyProof(prompt_hash, output_hash, Web3.to_checksum_address(req.creator)).call()
+        valid = contract.functions.verifyProof(
+            Web3.to_checksum_address(req.creator),
+            prompt_hash,
+            output_hash
+        ).call()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"verified": valid}
 
-import requests
+@app.post("/verify_tx")
+def verify_by_tx(req: VerifyTxRequest):
+    try:
+        valid = contract.functions.verifyProofByTx(Web3.to_bytes(hexstr=req.tx_hash)).call()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"verified": valid}
+
+@app.get("/proofs")
+def get_all_proofs():
+    try:
+        proofs = contract.functions.getAllProofs().call()
+        parsed = [proof_tuple_to_dict(p) for p in proofs]
+        return {"count": len(parsed), "proofs": parsed}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/proofs/paginated")
+def get_paginated_proofs(offset: int = Query(0, ge=0), limit: int = Query(5, ge=1)):
+    try:
+        proofs = contract.functions.getProofsPaginated(offset, limit).call()
+        parsed = [proof_tuple_to_dict(p) for p in proofs]
+        return {"offset": offset, "limit": limit, "count": len(parsed), "proofs": parsed}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/proofs/creator/{creator}")
+def get_proofs_by_creator(creator: str):
+    try:
+        proofs = contract.functions.getProofsByCreator(Web3.to_checksum_address(creator)).call()
+        parsed = [proof_tuple_to_dict(p) for p in proofs]
+        return {"count": len(parsed), "proofs": parsed}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/proof/{proof_id}")
+def get_proof_by_id(proof_id: int):
+    try:
+        proof = contract.functions.getProofById(proof_id).call()
+        return proof_tuple_to_dict(proof)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/proofs/count")
+def get_proof_count():
+    try:
+        count = contract.functions.getProofCount().call()
+        return {"proof_count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/creators/count")
+def get_creator_count():
+    try:
+        count = contract.functions.getCreatorCount().call()
+        return {"creator_count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ---------------- Gemini Integration ---------------- #
+
+genai_client = genai.Client(api_key=GEMINI_KEY)
 
 def gemini_generate_text(prompt: str) -> str:
-    # Simple POST to Google generative endpoint (replace with correct Gemini endpoint / client)
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateText?key={GEMINI_KEY}"
-    payload = {"prompt": prompt}
-    r = requests.post(url, json=payload, timeout=20)
-    r.raise_for_status()
-    data = r.json()
-    # adapt based on returned structure; this is illustrative:
-    return data.get("candidates", [{}])[0].get("content", "")
+    """Generate text using Google Gemini via genai Python SDK"""
+    if not GEMINI_KEY:
+        raise RuntimeError("Gemini API key not set")
+
+    try:
+        response = genai_client.generate_text(
+            model="text-bison-001",  # Use the model you have access to
+            prompt=prompt,
+            temperature=0.7,
+            max_output_tokens=512
+        )
+        return response.text  # The SDK directly provides the generated text
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini SDK error: {str(e)}")
+
 
 @app.post("/generate_and_register")
 def generate_and_register(prompt: str):
-    if not GEMINI_KEY:
-        raise HTTPException(status_code=500, detail="Gemini key not configured")
+    """Generate AI output via Gemini and register its proof"""
     ai_output = gemini_generate_text(prompt)
-    # reuse register logic
     return register(RegisterRequest(prompt=prompt, output=ai_output))
-

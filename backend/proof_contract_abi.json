@@ -4,9 +4,9 @@
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "bytes32",
-				"name": "id",
-				"type": "bytes32"
+				"internalType": "address",
+				"name": "creator",
+				"type": "address"
 			},
 			{
 				"indexed": false,
@@ -22,19 +22,248 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "address",
-				"name": "creator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "txHash",
+				"type": "bytes32"
 			}
 		],
 		"name": "ProofRegistered",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "getAllProofs",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "promptHash",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "outputHash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "verified",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "txHash",
+						"type": "bytes32"
+					}
+				],
+				"internalType": "struct ProofOfPrompt.Proof[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getCreatorCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "getProofById",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "promptHash",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "outputHash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "verified",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "txHash",
+						"type": "bytes32"
+					}
+				],
+				"internalType": "struct ProofOfPrompt.Proof",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getProofCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "creator",
+				"type": "address"
+			}
+		],
+		"name": "getProofsByCreator",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "promptHash",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "outputHash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "verified",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "txHash",
+						"type": "bytes32"
+					}
+				],
+				"internalType": "struct ProofOfPrompt.Proof[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "offset",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "limit",
+				"type": "uint256"
+			}
+		],
+		"name": "getProofsPaginated",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "promptHash",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "outputHash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "verified",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "txHash",
+						"type": "bytes32"
+					}
+				],
+				"internalType": "struct ProofOfPrompt.Proof[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -57,13 +286,10 @@
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"name": "proofs",
-		"outputs": [
+				"internalType": "address",
+				"name": "creator",
+				"type": "address"
+			},
 			{
 				"internalType": "string",
 				"name": "promptHash",
@@ -73,16 +299,14 @@
 				"internalType": "string",
 				"name": "outputHash",
 				"type": "string"
-			},
+			}
+		],
+		"name": "verifyProof",
+		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "creator",
-				"type": "address"
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -91,22 +315,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "promptHash",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "outputHash",
-				"type": "string"
-			},
-			{
-				"internalType": "address",
-				"name": "creator",
-				"type": "address"
+				"internalType": "bytes32",
+				"name": "txHash",
+				"type": "bytes32"
 			}
 		],
-		"name": "verifyProof",
+		"name": "verifyProofByTx",
 		"outputs": [
 			{
 				"internalType": "bool",

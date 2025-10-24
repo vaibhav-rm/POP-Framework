@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useWallet } from "../components/wallet-provider"
+import { registerProof } from "../api/api";
 
 export default function Dashboard() {
   const { address, isConnected } = useWallet()
@@ -21,52 +22,56 @@ export default function Dashboard() {
     }
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-    setResult(null)
+const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+  setResult(null);
 
-    if (!isConnected) {
-      setError("Please connect your wallet first")
-      setLoading(false)
-      return
-    }
-
-    try {
-      const formData = new FormData()
-      formData.append("prompt", prompt)
-      formData.append("creator", address || "")
-      formData.append("output_type", outputType)
-
-      if (outputType === "text") {
-        formData.append("output", output)
-      } else if (fileOutput) {
-        formData.append("file", fileOutput)
-      } else {
-        throw new Error("Please select a file")
-      }
-
-      const response = await fetch("/api/register", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to register proof")
-      }
-
-      const data = await response.json()
-      setResult(data)
-      setPrompt("")
-      setOutput("")
-      setFileOutput(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
-    } finally {
-      setLoading(false)
-    }
+  if (!isConnected) {
+    setError("Please connect your wallet first");
+    setLoading(false);
+    return;
   }
+
+  try {
+    if (outputType === "text") {
+      const data = await registerProof(prompt, output);
+setResult({
+  message: "Proof registered successfully",
+  prompt_hash: data.prompt_hash,
+  output_hash: data.output_hash,
+  creator: address,          // add creator address
+  tx_hash: data.tx_hash,
+  blockNumber: data.block_number, // make sure this matches API response
+});
+
+    } else if (fileOutput) {
+      const fileText = await fileOutput.text();
+      const data = await registerProof(prompt, fileText);
+  setResult({
+    message: "File proof registered successfully",
+    prompt_hash: data.prompt_hash,
+    output_hash: data.output_hash,
+    creator: address,
+    tx_hash: data.tx_hash,
+    blockNumber: data.block_number,
+  });
+    } else {
+      throw new Error("Please provide either text or a file as output");
+    }
+
+    //Reset fields after successful registration
+    setPrompt("");
+    setOutput("");
+    setFileOutput(null);
+  } catch (err: any) {
+    setError(err.response?.data?.detail || err.message || "An error occurred");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 min-h-screen">
@@ -74,7 +79,7 @@ export default function Dashboard() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
                 Register Your Proof
               </span>
             </h1>
@@ -170,7 +175,7 @@ export default function Dashboard() {
             <button
               type="submit"
               disabled={loading || !isConnected}
-              className="w-full px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3 bg-linear-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Registering..." : "Register Proof on Blockchain"}
             </button>

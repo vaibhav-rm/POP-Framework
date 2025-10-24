@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useWallet } from "../components/wallet-provider"
+import { getAllProofs, getProofCount, getCreatorCount } from "../api/api"
+
 
 export default function ViewHashes() {
   const { address } = useWallet()
@@ -18,20 +20,29 @@ export default function ViewHashes() {
     return () => clearInterval(interval)
   }, [address])
 
-  const fetchProofs = async () => {
-    try {
-      const response = await fetch("/api/proofs")
-      if (response.ok) {
-        const data = await response.json()
-        setProofs(data.proofs || [])
-        setStats(data.stats || { totalProofs: 0, uniqueCreators: 0, myProofs: 0 })
-      }
-    } catch (error) {
-      console.error("Error fetching proofs:", error)
-    } finally {
-      setLoading(false)
-    }
+const fetchProofs = async () => {
+  try {
+    const [proofData, proofCount, creatorCount] = await Promise.all([
+      getAllProofs(),
+      getProofCount(),
+      getCreatorCount(),
+    ])
+
+    setProofs(proofData.proofs || [])
+    setStats({
+      totalProofs: proofCount.total || proofData.proofs.length,
+      uniqueCreators: creatorCount.total || 0,
+      myProofs: proofData.proofs.filter(
+        (p: any) => p.creator.toLowerCase() === address?.toLowerCase()
+      ).length,
+    })
+  } catch (error) {
+    console.error("Error fetching proofs:", error)
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const filteredProofs = proofs
     .filter((proof) => {
@@ -60,7 +71,7 @@ export default function ViewHashes() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
                 Registered Proofs
               </span>
             </h1>

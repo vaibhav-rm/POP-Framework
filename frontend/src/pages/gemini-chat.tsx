@@ -43,7 +43,7 @@ const handleSend = async () => {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
                 AI Chat Assistant
               </span>
             </h1>
@@ -87,7 +87,7 @@ const handleSend = async () => {
             <button
               onClick={handleSend}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all disabled:opacity-50"
+              className="px-6 py-3 bg-linear-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all disabled:opacity-50"
             >
               Send
             </button>

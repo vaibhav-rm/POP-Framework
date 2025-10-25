@@ -43,7 +43,7 @@ export default function GeminiChat() {
               </span>
             </h1>
             <p className="text-xs sm:text-base lg:text-lg text-muted-foreground">
-              This is a demo implementation of the ProofChain API. All the prompts are hashed on the blockchain with your wallet ID.
+              This is a demo implementation of the ProofChain API. All the prompts are hashed on the blockchain with your wallet ID.  
             </p>
           </div>
 

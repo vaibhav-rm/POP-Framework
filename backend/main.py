@@ -187,20 +187,50 @@ def get_creator_count():
 genai_client = genai.Client(api_key=GEMINI_KEY)
 
 def gemini_generate_text(prompt: str) -> str:
-    """Generate text using Google Gemini via genai Python SDK"""
+    """Generate text using Gemini (Google Generative AI API)"""
     if not GEMINI_KEY:
         raise RuntimeError("Gemini API key not set")
+    
+    # Initialize the client with the API key
+    client = genai.Client(api_key=GEMINI_KEY)
+    
+    # Define the model and prompt
+    model_name = "gemini-2.5-flash"  # Replace with your desired model
+    prompt_text = prompt
+    
+    # Generate content using the model
+    response = client.models.generate_content(
+        model=model_name,
+        contents=[genai.types.Part(text=prompt_text)]
+    )
+    
+    # Extract and return the generated text
+    return response.text
 
+
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/api/chat")
+def chat_and_register(req: ChatRequest):
+    prompt = req.message
+
+    # 1️⃣ Generate AI response
     try:
-        response = genai_client.generate_text(
-            model="text-bison-001",  # Use the model you have access to
-            prompt=prompt,
-            temperature=0.7,
-            max_output_tokens=512
-        )
-        return response.text  # The SDK directly provides the generated text
+        ai_output = gemini_generate_text(prompt)  # uses genai SDK
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gemini SDK error: {str(e)}")
+
+    # 2️⃣ Register proof on blockchain
+    try:
+        register(RegisterRequest(prompt=prompt, output=ai_output))
+    except Exception as e:
+        # Log but don’t block the chat response
+        print("Error registering proof:", e)
+
+    # 3️⃣ Return AI response to frontend
+    return {"response": ai_output}
+
 
 
 @app.post("/generate_and_register")

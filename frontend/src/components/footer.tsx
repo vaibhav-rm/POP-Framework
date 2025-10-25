@@ -1,15 +1,17 @@
 export default function Footer() {
   return (
     <footer className="border-t border-border bg-background/50 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">ProofChain</h3>
-            <p className="text-sm text-muted-foreground">Immutable proof of AI-generated content on the blockchain.</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-semibold text-foreground text-sm sm:text-base">ProofChain</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Immutable proof of AI-generated content on the blockchain.
+            </p>
           </div>
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground">Product</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="font-semibold text-foreground text-sm sm:text-base">Product</h4>
+            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-foreground transition">
                   Features
@@ -27,9 +29,9 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground">Resources</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="font-semibold text-foreground text-sm sm:text-base">Resources</h4>
+            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-foreground transition">
                   Documentation
@@ -47,9 +49,9 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div className="space-y-4">
-            <h4 className="font-semibold text-foreground">Legal</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="font-semibold text-foreground text-sm sm:text-base">Legal</h4>
+            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-foreground transition">
                   Privacy
@@ -68,16 +70,18 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-border pt-8 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">© 2025 ProofChain. All rights reserved.</p>
+        <div className="border-t border-border pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+            © 2025 ProofChain. All rights reserved.
+          </p>
           <div className="flex gap-4">
-            <a href="#" className="text-muted-foreground hover:text-foreground transition">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition">
               Twitter
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition">
               GitHub
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition">
+            <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition">
               Discord
             </a>
           </div>

@@ -40,17 +40,9 @@ This proof can later be verified by anyone via the provided REST API.
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/yourusername/proof-of-prompt.git
-cd proof-of-prompt
+git clone https://github.com/vaibhav-rm/ProofChain.git
+cd ProofChain
 ---
-
-## ⚙️ Setup Instructions
-
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/yourusername/proof-of-prompt.git
-cd proof-of-prompt
-````
 
 ### 2️⃣ Create and Activate a Virtual Environment
 
@@ -145,7 +137,7 @@ curl -X POST "http://127.0.0.1:8000/verify" \
 
 ## 🪙 Example Transaction
 
-👉 [View on Sepolia Etherscan](https://sepolia.etherscan.io/tx/78fb314cc047998451fa7583bfcb5efcd1eefe9d462b759e4ff51641744185a2)
+👉 [View on Sepolia Etherscan](https://sepolia.etherscan.io/tx/0x9e946269fc7a910fa4fdafca3bfc3d4b6e669ba7e5c2952958eace3f322dfa21)
 
 ---
 

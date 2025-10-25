@@ -33,7 +33,7 @@ contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 
 # FastAPI app
 app = FastAPI(
-    title="Proof-of-Prompt API",
+    title="ProofChain API",
     description="A blockchain-based service that registers and verifies immutable AI prompt-output proofs.",
     version="2.0.0"
 )

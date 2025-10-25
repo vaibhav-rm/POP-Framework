@@ -1,40 +1,41 @@
 "use client"
 
 import { useState } from "react"
+import { chatAndRegister } from "../api/api";
 
 export default function GeminiChat() {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
 
-const handleSend = async () => {
-  if (!input.trim()) return
+  const handleSend = async () => {
+    if (!input.trim()) return
 
-  const userMessage = { role: "user", content: input }
-  setMessages([...messages, userMessage])
-  setInput("")
-  setLoading(true)
+    const userMessage = { role: "user", content: input }
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setLoading(true)
 
-  try {
-    const response = await fetch("http://127.0.0.1:8000/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input }),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      // Add AI message
-      setMessages((prev) => [...prev, { role: "assistant", content: data.response }])
-    } else {
-      console.error("Error:", await response.text())
+    try {
+      // ✅ Axios returns already-parsed JSON data
+      const data = await chatAndRegister({ message: input });
+      
+      // Ensure backend returns { response: "..." }
+      if (data?.response) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.response }])
+      } else {
+        console.error("Invalid API response:", data)
+      }
+    } catch (error) {
+      console.error("Error in chat:", error)
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "⚠️ Something went wrong with the AI response." },
+      ])
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error("Error:", error)
-  } finally {
-    setLoading(false)
   }
-}
 
 
   return (

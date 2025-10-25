@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_BASE_URL = "http://localhost:8000" // change to your FastAPI server URL
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance
 const api = axios.create({
@@ -64,7 +64,7 @@ export const generateAndRegister = async (prompt: string) => {
 }
 
 // Chat endpoint — returns AI response & auto-registers proof
-export const chatAndRegister = async (message: string) => {
-  const res = await api.post("/api/chat", { message })
+export const chatAndRegister = async (payload: { message: string }) => {
+  const res = await api.post("/api/chat", payload)
   return res.data
 }

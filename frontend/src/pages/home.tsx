@@ -8,7 +8,6 @@ export default function Home() {
   const [stats, setStats] = useState({
     totalProofs: 0,
     uniqueCreators: 0,
-    myProofs: 0,
   })
 
   useEffect(() => {
@@ -22,8 +21,7 @@ export default function Home() {
 
       setStats({
         totalProofs: proofData.proof_count || 0,
-        uniqueCreators: creatorData.creator_count || 0,
-        myProofs: 0, // optional — can later be fetched by wallet address
+        uniqueCreators: creatorData.creator_count || 0
       })
     } catch (error) {
       console.error("Error fetching stats:", error)
@@ -112,9 +110,7 @@ export default function Home() {
               </div>
               <div className="space-y-2 group cursor-pointer">
                 <p className="text-3xl md:text-4xl font-bold text-secondary group-hover:text-primary transition-colors">
-                  {stats.myProofs}
                 </p>
-                <p className="text-sm text-muted-foreground">Your Proofs</p>
               </div>
             </div>
           </div>
